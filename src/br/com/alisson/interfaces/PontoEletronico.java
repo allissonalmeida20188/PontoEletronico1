@@ -14,12 +14,12 @@ import java.util.Scanner;
  * @author Alisson
  */
 public interface PontoEletronico {
-    
+
     public void menuPrincipal(Scanner scanner, Funcionario funcionario);
     public void menuDoAdm(Scanner scanner, Funcionario funcionario);
-    public void menuDoFunc(Scanner scanner);
+    public void menuDoFunc(Scanner scanner, Funcionario funcionario);
     public void acessarMenu(Scanner scanner, Funcionario funcionario);
     public void registrarPonto(Scanner scanner, Funcionario funcionario, LocalDateTime horario);
     public void getFolhaPonto(Funcionario matricula);
-    
+
 }
