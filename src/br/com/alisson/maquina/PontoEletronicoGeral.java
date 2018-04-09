@@ -9,6 +9,7 @@ import br.com.alisson.entidades.Administrador;
 import br.com.alisson.entidades.Funcionario;
 import br.com.alisson.entidades.Operario;
 import br.com.alisson.interfaces.PontoEletronico;
+import br.com.alisson.util.Calculos;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,7 +25,7 @@ import java.util.Scanner;
  *
  * @author Alisson
  */
-public class PontoEletronicoGeral implements PontoEletronico {
+public final class PontoEletronicoGeral implements PontoEletronico {
 
     Map<Integer, FolhaPonto> registroPonto;
 
@@ -32,10 +33,17 @@ public class PontoEletronicoGeral implements PontoEletronico {
         registroPonto = new HashMap();
     }
 
+    /**
+     * Método que inicia o menu principal
+     *
+     * @param sc scanner do shell
+     * @param funcionario objeto do tipo Funcionario
+     */
     @Override
     public void menuPrincipal(Scanner sc, Funcionario funcionario) {
         int op = 0;
         do {
+            System.out.println("-----Menu Principal do Sistema-----");
             System.out.println("1. Bater Ponto");
             System.out.println("2. Acessar Menu");
             System.out.println("3. Sair");
@@ -44,8 +52,18 @@ public class PontoEletronicoGeral implements PontoEletronico {
             switch (op) {
                 case 1:
                     System.out.println("Bater Ponto");
-                    System.out.println("Qual a matricula?");
-                    registrarPonto(sc, funcionario, LocalDateTime.now());
+                    System.out.print("Qual a matricula do funcionário?: ");
+                    int m = sc.nextInt();
+                    List<Funcionario> lista = ((Administrador) funcionario).getLista();
+                    if (lista != null) {
+                        lista.forEach(f -> {
+                            if (f.getMatricula() == m) {
+                                registrarPonto(sc, funcionario, LocalDateTime.now());
+                            }
+                        });
+                    } else {
+                        System.out.println("Não existem funcionário registrados");
+                    }
                     break;
                 case 2:
                     System.out.println("Acessar menu");
@@ -63,14 +81,22 @@ public class PontoEletronicoGeral implements PontoEletronico {
         } while (op != 3);
     }
 
+    /**
+     * Método que inicia o menu de administrador do sistema
+     * 
+     * @param scanner scanner do shell
+     * @param funcionario objeto do tipo Funcionario
+     */
     @Override
     public void menuDoAdm(Scanner scanner, Funcionario funcionario) {
         int op = 0;
         do {
+            System.out.println("-----Menu de Administrador-----");
             System.out.println("1. Cadastrar Funcionário");
             System.out.println("2. Ver folha de ponto de funcionário");
             System.out.println("3. Voltar");
             System.out.println("4. Sair");
+            System.out.print(">>> ");
             op = scanner.nextInt();
             switch (op) {
                 case 1:
@@ -101,20 +127,35 @@ public class PontoEletronicoGeral implements PontoEletronico {
         menuPrincipal(scanner, funcionario);
     }
 
+    /**
+     * Método que inicia o menu do funcionário
+     * 
+     * @param scanner scanner do shell
+     * @param funcionario funcionario selecionado
+     */
     @Override
-    public void menuDoFunc(Scanner scanner) {
+    public void menuDoFunc(Scanner scanner, Funcionario funcionario) {
         int op = 0;
+        Calculos calc = new Calculos();
         do {
+            System.out.println("----Menu de Funcionário----");
             System.out.println("1. Ver Horas Trabalhadas");
+            System.out.println("2. Ver Folha de Ponto");
+            System.out.print(">>> ");
             op = scanner.nextInt();
             switch (op) {
                 case 1:
-                    //System.out.println("Você já trabalhou " + aux.getHorasTrab() + " horas neste mês");
+                    System.out.println("Se deseja uma data especifica informe...");
+                    System.out.print("Data: ");
+                    String str = scanner.nextLine();
+                    System.out.println(calc.getHorasTrabalhadas(registroPonto.get(funcionario.getMatricula()), LocalDate.parse(str, DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
                     break;
                 case 2:
+                    getFolhaPonto(funcionario);
                     break;
             }
         } while (op != 2);
+        menuPrincipal(scanner, funcionario);
     }
 
     @Override
@@ -180,7 +221,7 @@ public class PontoEletronicoGeral implements PontoEletronico {
                         } else {
                             //aux = f;
                             System.out.println("Logado como Funcionario");
-                            menuDoFunc(scanner);
+                            menuDoFunc(scanner, funcionario);
                             break;
                         }
                     }
@@ -203,7 +244,7 @@ public class PontoEletronicoGeral implements PontoEletronico {
                 fp.getListaPonto().forEach(p -> {
                     System.out.println(p.getTipo() + p.getHorario().format(DateTimeFormatter.ofPattern("HH:mm")) + " - " + p.getDataPonto().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 });
-            }else{
+            } else {
                 System.out.println("Este funcionário não registrou nenhum ponto até o momento");
             }
             System.out.println("----------------------------------------");
