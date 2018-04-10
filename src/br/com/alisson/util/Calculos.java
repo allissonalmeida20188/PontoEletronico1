@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -31,24 +32,31 @@ public final class Calculos {
      */
     public String getHorasTrabalhadas(FolhaPonto folhaPonto, LocalDate dia) {
         List<Ponto> lista = folhaPonto.getListaPonto();
-        LocalTime horas = null;
-        String msg = "Horas Trabalhadas ";
+        LocalTime hTrabalhada;
+        int horas = 0;
+        int minutos = 0;
+        String msg = "\n\nHoras Trabalhadas ";
         if (lista != null) {
-            lista.forEach(p -> {
+            for (Ponto p : lista) {
                 if (dia != null) {
                     if (p.getDataPonto().equals(dia)) {
-                        horas.plusHours(p.getHorario().getHour());
-                        horas.plusMinutes(p.getHorario().getMinute());
+                        if (Objects.equals("Entrada", p.getTipo())) {
+                            horas += lista.get(lista.indexOf(p) + 1).getHorario().getHour() - p.getHorario().getHour();
+                            minutos += lista.get(lista.indexOf(p) + 1).getHorario().getMinute() - p.getHorario().getMinute();
+                        }
                     }
                 } else {
-                    horas.plusHours(p.getHorario().getHour());
-                    horas.plusMinutes(p.getHorario().getMinute());
+                    if (Objects.equals("Entrada", p.getTipo())) {
+                        horas += lista.get(lista.indexOf(p) + 1).getHorario().getHour() - p.getHorario().getHour();
+                        minutos += lista.get(lista.indexOf(p) + 1).getHorario().getMinute() - p.getHorario().getMinute();
+                    }
                 }
-            });
+            }
+            hTrabalhada = LocalTime.of(horas, minutos, 0);
             //agrega sufixo da mensagem
             msg = dia != null ? msg.concat("em ".concat(dia.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))) : msg.concat("");
-            msg = msg.concat(": ".concat(horas.format(DateTimeFormatter.ofPattern("HH:mm"))));
-            return msg;
+            msg = msg.concat(": ".concat(hTrabalhada.format(DateTimeFormatter.ofPattern("HH:mm"))));
+            return msg.concat("\n\n");
         }
         return "Não existem registro deste funcionário";
     }
